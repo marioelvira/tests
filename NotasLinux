@@ -145,3 +145,20 @@ tail -20 archivo
 
 Como siempre mayor información la podrán encontrár en las páginas de mantenimiento con el comando "man". 
 
+GIT
+***
+
+Create a new repository on the command line
+
+echo "# tests" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin https://github.com/marioelvira/tests.git
+git push -u origin master
+
+Push an existing repository from the command line
+git remote add origin https://github.com/marioelvira/tests.git
+git push -u origin master
+
+
