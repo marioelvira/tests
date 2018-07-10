@@ -1,0 +1,3 @@
+/home/mario/tests/myhello/build-i86/CMakeFiles/edit_cache.dir
+/home/mario/tests/myhello/build-i86/CMakeFiles/rebuild_cache.dir
+/home/mario/tests/myhello/build-i86/CMakeFiles/Tutorial.dir

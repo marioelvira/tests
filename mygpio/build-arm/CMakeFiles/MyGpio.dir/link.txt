@@ -1,0 +1,1 @@
+/opt/fslc-x11/2.4.1/sysroots/x86_64-fslcsdk-linux/usr/bin/arm-fslc-linux-gnueabi/arm-fslc-linux-gnueabi-gcc   -march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard --sysroot=/opt/fslc-x11/2.4.1/sysroots/armv7at2hf-neon-fslc-linux-gnueabi  -O2 -pipe -g -feliminate-unused-debug-types   -Wl,-O1 -Wl,--hash-style=gnu -Wl,--as-needed -rdynamic CMakeFiles/MyGpio.dir/mygpio.c.o  -o MyGpio 

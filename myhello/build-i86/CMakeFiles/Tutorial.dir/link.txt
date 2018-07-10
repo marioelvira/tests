@@ -1,0 +1,1 @@
+/usr/bin/cc     CMakeFiles/Tutorial.dir/myhello.c.o  -o Tutorial -rdynamic 
