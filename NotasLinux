@@ -1,0 +1,147 @@
+PUESTA EN MARCHA DE LINUX EN VARISCITE
+**************************************
+
+1) Vamos a la página de Variscite y segumos los pasos del primer enlace en su Wiki.
+repo init -u https://github.com/varigit/variscite-bsp-platform.git -b rocko
+
+2) Hemos conectado el USB y me genera un puerto serie en ttyUSB0.
+Lo vemos con el comando dmesg.
+Instalamos un hyperterminar: sudo apt-get installa minicom
+Y lo ejecutacmos y abrimos el ttyUSB0: 
+sudo minicom -D /dev/ttyUSB0
+
+3) Montamos una image de Variscite con Yocto.
+bitbake core-image-minimal
+
+En /var-fslc-yocto/ está el proyecto Yoctoroot
+En /var-fslc-yocto/sources/ están los archivos meta-mytests
+
+Notas Varias:
+	sudo umount /dev/mmcblk0
+	$ zcat <image name>.img.gz | sudo dd of=/dev/sdX bs=1M && sync
+
+
+COMPILACIÓN DE UN PROGRAMA
+**************************
+1) Creamos una carpeta tests
+mkdir tests/
+
+2) Creamos una carpeta tests/myhello
+cd tests
+mkdir myhello/
+
+3) Creamos el archivo myhello.c
+4) Creamos el archivo CMakelist.txt con:
+
+cmake_minimum_required (VERSION 2.6)
+project (Tutorial)
+add_executable(Tutorial myhello.c)
+
+5) Creamos la carpeta build-arm
+mkdir build-arm/
+
+6) vamos al archivo cd build-arm y fijamos las variables de entrorno.
+La ruta está donde nos las ha dejado el Yocto de Variscite.
+Para ello llamamos a script. 
+
+source /opt/fslc-x11/2.4.1/environment-setup-armv7at2hf-neon-fslc-linux-gnueabi 
+con printenv puedes ver tus variables de entrono.
+
+7) Ejecutamos el cmake
+cmake ../
+El busca el archivo CMakelist.txt y nos genera los ficheros y el Makefile dentro de build-arm/
+
+8) Para compliar el código ejecutamos el make. El busca el Make
+make
+
+
+
+CREACION DE UNA RECETA EN YOCTO
+*******************************
+1) Vamos a la página de Variscite y segumos los pasos del primer enlace en su Wiki.
+2) en ~/var-fslc-yocto/build_x11/ es donde Yocto genera todo.
+3) en /tmp/work/ es donde Yocto compila.
+
+... 
+Una vez hemos montado todo
+1) Vamos a la carpeta ~/var-fslc-yocto/ y generamos las variables de entorno. Para ello:
+source sources/poky/oe-init-build-env build_x11/
+Nota: Esto se hace solo una vez en el terminal que vayas a generar. Pero si abrimos uno nuevo hay que hacerlo de nuevo.
+
+2) Hacemos el bitbake mytests-image-custom
+donde mytests-image-custom es el nombre del .bb que hemos añadido.
+
+3) Copiamos lo archivos que necesitamos:
+zImage - Kernel
+u-boot - bootloader
+SPL-nand - bootloader inicial
+mytest-xxxx-custom.ubi - sistema de ficheros
+
+
+2 Manipulating a single GPIO via /sys/class/gpio
+************************************************
+
+GPIOs in i.MX are grouped in groups of 32 pins.
+- GPIO4_22 will be (4-1)*32+22=118.
+- GPIO4_23 will be (4-1)*32+23=119.
+
+To configure as output:
+$ echo 119 > /sys/class/gpio/export
+$ echo out > /sys/class/gpio/gpio119/direction
+$ echo 1 > /sys/class/gpio/gpio119/value
+$ echo 0 > /sys/class/gpio/gpio119/value
+
+
+To configure as input:
+$ echo 118 > /sys/class/gpio/export
+$ echo in > /sys/class/gpio/gpio118/direction
+$ cat /sys/class/gpio/gpio118/value
+
+
+Comandos Linux - Mover, Copiar, Borrar y Visualizar Archivos
+************************************************************
+
+Listar todos los archivos (excepto los ocultos) del directorio actual, en formato detallado.
+ls -l
+
+Listar los archivos del directorio actual, indicando el tipo de archivo.
+ls -F
+
+Listar todos los archivos (incluyendo los ocultos) del directorio actual, en formato detallado y presentarlo en columnas.
+ls -laC
+
+Borrar el archivo o directorio denominado "fichero"
+rm fichero
+
+Borrar el directorio denominado "directorio", incluyendo todos sus archivos y subdirectorios.
+rm -rf directorio
+
+Copiar el archivo o directorio denominado "fichero" al directorio "/home/datos".
+cp fichero /home/datos/
+
+Mover el archivo o directorio denominado "fichero" al directorio "/home/datos".
+mv fichero /home/datos/
+
+Visualizar el archivo denominado "archivo".
+cat archivo
+
+Visualizar todas las paginas de mantenimiento que contienen la palabra "palabraclave".
+man -k palabraclave
+
+Visualizar el archivo denominado "archivo", una página a la vez. Para avanzar a la siguiente página se debe presionar la barra espaciadora.
+more archivo
+
+Visualizar las 10 primeras líneas del archivo denominado "archivo".
+head archivo
+
+Visualizar las 20 primeras líneas del archivo denominado "archivo".
+head -20 archivo
+
+Visualizar las 10 últimas líneas del archivo denominado "archivo".
+tail archivo
+
+Visualizar las 20 últimas líneas del archivo denominado "archivo".
+tail -20 archivo
+
+Como siempre mayor información la podrán encontrár en las páginas de mantenimiento con el comando "man". 
+
