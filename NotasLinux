@@ -1,14 +1,15 @@
-PUESTA EN MARCHA DE LINUX EN VARISCITE
-**************************************
+******************************************
+* PUESTA EN MARCHA DE LINUX EN VARISCITE *
+******************************************
 
 1) Vamos a la página de Variscite y segumos los pasos del primer enlace en su Wiki.
-repo init -u https://github.com/varigit/variscite-bsp-platform.git -b rocko
+$repo init -u https://github.com/varigit/variscite-bsp-platform.git -b rocko
 
 2) Hemos conectado el USB y me genera un puerto serie en ttyUSB0.
-Lo vemos con el comando dmesg.
+Lo vemos con el comando $dmesg.
 Instalamos un hyperterminar: sudo apt-get installa minicom
 Y lo ejecutacmos y abrimos el ttyUSB0: 
-sudo minicom -D /dev/ttyUSB0
+$sudo minicom -D /dev/ttyUSB0
 
 3) Montamos una image de Variscite con Yocto.
 bitbake core-image-minimal
@@ -17,18 +18,18 @@ En /var-fslc-yocto/ está el proyecto Yoctoroot
 En /var-fslc-yocto/sources/ están los archivos meta-mytests
 
 Notas Varias:
-	sudo umount /dev/mmcblk0
+	$ sudo umount /dev/mmcblk0
 	$ zcat <image name>.img.gz | sudo dd of=/dev/sdX bs=1M && sync
 
-
-COMPILACIÓN DE UN PROGRAMA
-**************************
+******************************
+* COMPILACIÓN DE UN PROGRAMA *
+******************************
 1) Creamos una carpeta tests
-mkdir tests/
+$mkdir tests/
 
 2) Creamos una carpeta tests/myhello
-cd tests
-mkdir myhello/
+$cd tests
+$mkdir myhello/
 
 3) Creamos el archivo myhello.c
 4) Creamos el archivo CMakelist.txt con:
@@ -38,37 +39,86 @@ project (Tutorial)
 add_executable(Tutorial myhello.c)
 
 5) Creamos la carpeta build-arm
-mkdir build-arm/
+$ mkdir build-arm/
 
 6) vamos al archivo cd build-arm y fijamos las variables de entrorno.
 La ruta está donde nos las ha dejado el Yocto de Variscite.
 Para ello llamamos a script. 
 
-source /opt/fslc-x11/2.4.1/environment-setup-armv7at2hf-neon-fslc-linux-gnueabi 
-con printenv puedes ver tus variables de entrono.
+$source /opt/fslc-x11/2.4.1/environment-setup-armv7at2hf-neon-fslc-linux-gnueabi 
+con $printenv puedes ver tus variables de entrono.
 
 7) Ejecutamos el cmake
-cmake ../
+$cmake ../
 El busca el archivo CMakelist.txt y nos genera los ficheros y el Makefile dentro de build-arm/
 
 8) Para compliar el código ejecutamos el make. El busca el Make
-make
+$make
 
 
-
-CREACION DE UNA RECETA EN YOCTO
-*******************************
+***********************************
+* CREACION DE UNA RECETA EN YOCTO *
+***********************************
 1) Vamos a la página de Variscite y segumos los pasos del primer enlace en su Wiki.
 2) en ~/var-fslc-yocto/build_x11/ es donde Yocto genera todo.
 3) en /tmp/work/ es donde Yocto compila.
 
+4) en ~/var-fslc-yocto/sources/ es donde Yocto tiene el código fuente.
+5) Dentro de ~/var-fslc-yocto/sources/ creamos el directorio "meta-mytests"
+$mkdir meta-mytests
+6) Dentro de ~/var-fslc-yocto/sources/meta-mytests/ tenemos la siguiente estrcutura
+-> /conf/
+	-> layer.conf
+-> /recipes-gpio/
+	-> /gpio-manager/
+		-> gpio-manager.bb // Receta que se baja el código de GIT, lo compila y lo añade a la imagen.
+			CRIPTION = "gpio manager" 
+			SECTION = "examples" 
+			LICENSE = "CLOSED" 
+			PR = "r0"
+			PV = "1.0"
+
+			SRC_URI = "git://github.com/marioelvira/tests.git;protocol=https"
+
+			S = "${WORKDIR}/git"
+
+			inherit pkgconfig cmake
+-> /recipes-mytest-custon/
+	-> /images/
+		-> mytests-image-custom.bb	// 
+
+			SUMMARY = "My image"
+
+			IMAGE_INSTALL = "packagegroup-core-boot ${CORE_IMAGE_EXTRA_INSTALL}"
+			IMAGE_LINGUAS = " "
+
+
+			IMAGE_FEATURES = "debug-tweaks ssh-server-openssh "
+			IMAGE_INSTALL += " \
+				    u-boot-variscite \
+				    mtd-utils-ubifs \
+				    hostapd \
+				    mtd-utils \
+				    imx-kobs \
+				    brcm-patchram-plus \
+				    kernel-modules \
+				    openssh-sshd \
+				    openssh-sftp-server \
+				    openssh \
+				    gpio-manager \			// Receta nuestra
+
+
+inherit core-image
+
 ... 
+
 Una vez hemos montado todo
 1) Vamos a la carpeta ~/var-fslc-yocto/ y generamos las variables de entorno. Para ello:
-source sources/poky/oe-init-build-env build_x11/
-Nota: Esto se hace solo una vez en el terminal que vayas a generar. Pero si abrimos uno nuevo hay que hacerlo de nuevo.
+$source sources/poky/oe-init-build-env build_x11/
 
-2) Hacemos el bitbake mytests-image-custom
+Nota: Esto se hace solo una vez en el terminal que vayas a generar. Pero si abrimos un teminal nuevo hay que hacerlo de nuevo.
+
+2) Hacemos el $bitbake mytests-image-custom
 donde mytests-image-custom es el nombre del .bb que hemos añadido.
 
 3) Copiamos lo archivos que necesitamos:
@@ -78,8 +128,58 @@ SPL-nand - bootloader inicial
 mytest-xxxx-custom.ubi - sistema de ficheros
 
 
-2 Manipulating a single GPIO via /sys/class/gpio
-************************************************
+
+*******
+* GIT *
+*******
+
+Create a new repository on the command line
+
+echo "# tests" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin https://github.com/marioelvira/tests.git
+git push -u origin master
+
+Push an existing repository from the command line
+git remote add origin https://github.com/marioelvira/tests.git
+git push -u origin master
+
+
+**************************
+* ESTRUCTURA DE PROGRAMA *
+**************************
+
+El directorio /testsreop/ esta linkado al repositorio GIT "github.com/marioelvira/tests.git"
+Su contenido es:
+
+-> CMakeLists.txt		// Lista con todos los CMakeLists
+	cmake_minimum_required(VERSION 2.8)
+	project(mytests)
+
+	add_subdirectory (mygpio)
+	add_subdirectory (myhello)
+
+-> /mypgio/			// directorio con el proyecto mygpio
+	-> mpgio.c		// codigo fuente
+	-> CMakeLists.txt	// Fichero cmake, lo compila y lo instala
+			
+			cmake_minimum_required (VERSION 2.6)
+			project (MyGpio)
+			add_executable(MyGpio mygpio.c)
+			install(TARGETS MyGpio RUNTIME DESTINATION /usr/local/bin/)
+	->/build-arm/	
+
+
+
+<<<<<<<>>>>>>>
+<<<< OTROS >>>
+<<<<<<<>>>>>>>
+
+**************************************************
+* Manipulating a single GPIO via /sys/class/gpio *
+**************************************************
 
 GPIOs in i.MX are grouped in groups of 32 pins.
 - GPIO4_22 will be (4-1)*32+22=118.
@@ -144,21 +244,5 @@ Visualizar las 20 últimas líneas del archivo denominado "archivo".
 tail -20 archivo
 
 Como siempre mayor información la podrán encontrár en las páginas de mantenimiento con el comando "man". 
-
-GIT
-***
-
-Create a new repository on the command line
-
-echo "# tests" >> README.md
-git init
-git add README.md
-git commit -m "first commit"
-git remote add origin https://github.com/marioelvira/tests.git
-git push -u origin master
-
-Push an existing repository from the command line
-git remote add origin https://github.com/marioelvira/tests.git
-git push -u origin master
 
 
