@@ -132,6 +132,8 @@ mytest-xxxx-custom.ubi - sistema de ficheros
 *******
 * GIT *
 *******
+user: 	marioelvira
+passwd:	@Iobl2005
 
 Create a new repository on the command line
 
